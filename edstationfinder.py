@@ -167,9 +167,9 @@ def compareStations():
                     print('Comparing %s to %s' % (originSystemName, destSystemName))
                 if isSystemHit(destSystemID) and duplicate(originSystemName, destSystemName) == False:
                     destStationDistance = listSystemStations(destSystemID)[0].get('distance')
-                    print('\n!HIT: %s(%dls) to %s(%dls) - (%dly)\n' % (originSystemName, originStationDistance, destSystemName, destStationDistance, destSystemDistance))
+                    print('\n!HIT: %s(%sls) to %s(%sls) - (%dly)\n' % (originSystemName, format(originStationDistance, ',d'), destSystemName, format(destStationDistance, ',d'), destSystemDistance))
                     with open('results.txt', 'a') as results:
-                        results.write('%s(%dls) to %s(%dls) - (%dly)\r\n' % (originSystemName, originStationDistance, destSystemName, destStationDistance, destSystemDistance))
+                        results.write('%s(%sls) to %s(%sls) - (%dly)\r\n' % (originSystemName, format(originStationDistance, ',d'), destSystemName, format(destStationDistance, ',d'), destSystemDistance))
                     results.close()
             except TypeError:
                 pass
