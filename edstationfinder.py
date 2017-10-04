@@ -112,9 +112,10 @@ def findNearbyStations(systemName, range): #Connect to EDSM to find all systems 
             timeout = 0
         if verbose:
             print('%s seconds since last API call' % (str(round(offset, 2))))
+    print('Searching for systems within %dly of %s' % (range, systemName))
     session = requests_cache.CachedSession() #Cache responses from EDSM for faster subsequent runs.
     session.hooks = {'response': make_throttle_hook(timeout)}
-    response = session.get(edsmapi, params=payload)
+    response = session.get(edsmapi, params=payload, stream=True)
     if response.from_cache == False:
         start = timer()
     if response.status_code == 200:
@@ -156,7 +157,6 @@ def compareStations():
         originSystemID = station.get('systemID')
         originSystemName = station.get('systemname')
         originStationDistance = station.get('distance')
-        print('Comparing %s to nearby systems' % (originSystemName))
         nearbySystems = findNearbyStations(originSystemName, lyRange)
         for system in nearbySystems:
             destSystemName = system.get('name')
@@ -179,7 +179,7 @@ def duplicate(originSystemName, destSystemName): #Check if origin and destinatio
         if verbose:
             print('!DUPLICATE: %s and %s are the same' % (originSystemName, destSystemName))
         return True
-    with open('results.txt', 'a+') as results:
+    with open('results.txt', 'r') as results:
         for hit in results:
             if originSystemName in hit and destSystemName in hit:
                 if verbose:
@@ -200,7 +200,7 @@ def make_throttle_hook(timeout):
     def hook(response, *args, **kwargs):
         if not getattr( response, 'from_cache', False):
             if timeout != 0:
-                print('API RATE LIMIT: Sleeping for %s seconds' % (str(round(timeout, 2))))
+                print('API RATE LIMIT: Waiting %s seconds...' % (str(round(timeout, 2))))
             time.sleep(timeout)
         return response
     return hook
@@ -271,6 +271,10 @@ def primeDatabase():
 
 if os.path.exists('db.sqlite') == False: # If database file does not exist, create and prime the database with data.
     primeDatabase()
+    
+if os.path.exists('results.txt') == False:
+    with open('results.txt', 'a+') as newfile:
+        newfile.close()
 
 db = sqlite3.connect('db.sqlite') #Initial database connection.
 db.row_factory = sqlite3.Row
