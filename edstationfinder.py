@@ -9,7 +9,7 @@ from timeit import default_timer as timer
 verbose = False #Verbose output for debugging.
 padSize = 'L' #Pad size for matches.
 lyRange = 14 #Maximum sitance between systems.
-minDistance = 1000 #Minimum station distance from star.
+minDistance = 30000 #Minimum station distance from star.
 maxDistance = 999999999 #Maximum station distance from star.
 
 requests_cache.install_cache() #Cache responses from EDSM to greatly speed up subsequent runs.
@@ -200,7 +200,7 @@ def make_throttle_hook(timeout):
     def hook(response, *args, **kwargs):
         if not getattr( response, 'from_cache', False):
             if timeout != 0:
-                print('RATE LIMIT: Sleeping for %d seconds' % (timeout))
+                print('API RATE LIMIT: Sleeping for %d seconds' % (timeout))
             time.sleep(timeout)
         return response
     return hook
