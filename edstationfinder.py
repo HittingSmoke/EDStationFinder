@@ -6,7 +6,7 @@ import sqlite3
 import json
 from timeit import default_timer as timer
 
-verbose = False #Verbose output for debugging.
+verbose = True #Verbose output for debugging.
 padSize = 'L' #Pad size for matches.
 lyRange = 14 #Maximum sitance between systems.
 minDistance = 30000 #Minimum station distance from star.
@@ -111,10 +111,10 @@ def findNearbyStations(systemName, range): #Connect to EDSM to find all systems 
         if timeout < 0:
             timeout = 0
         if verbose:
-            print('%d seconds since last API call' % (offset))
+            print('%s seconds since last API call' % (str(round(offset, 2))))
     session = requests_cache.CachedSession() #Cache responses from EDSM for faster subsequent runs.
     session.hooks = {'response': make_throttle_hook(timeout)}
-    response = session.get(edsmapi, params=payload)
+    response = session.get(edsmapi, params=payload, stream=True)
     if response.from_cache == False:
         start = timer()
     if response.status_code == 200:
@@ -200,7 +200,7 @@ def make_throttle_hook(timeout):
     def hook(response, *args, **kwargs):
         if not getattr( response, 'from_cache', False):
             if timeout != 0:
-                print('API RATE LIMIT: Sleeping for %d seconds' % (timeout))
+                print('API RATE LIMIT: Sleeping for %s seconds' % (str(round(timeout, 2))))
             time.sleep(timeout)
         return response
     return hook

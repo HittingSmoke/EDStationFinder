@@ -1,3 +1,2 @@
-cache.sqlite
+*.sqlite
 results.txt
-db.sqlite
