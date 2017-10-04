@@ -10,7 +10,7 @@ Yes it's messy. Yes it could be better optimized. It was an afternoon project.
 
 ## Installation
 
-I'm not going to hold anyone's hand with this. You're on your own except for some basics.
+I'm not going to hold anyone's hand with this. Download the script and install the dependencies, then you can run it. That simple. If you need help installing Python and the libraries, try Google.
 
 ### Dependencies:
 * Python3
