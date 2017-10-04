@@ -114,7 +114,7 @@ def findNearbyStations(systemName, range): #Connect to EDSM to find all systems 
             print('%s seconds since last API call' % (str(round(offset, 2))))
     session = requests_cache.CachedSession() #Cache responses from EDSM for faster subsequent runs.
     session.hooks = {'response': make_throttle_hook(timeout)}
-    response = session.get(edsmapi, params=payload, stream=True)
+    response = session.get(edsmapi, params=payload)
     if response.from_cache == False:
         start = timer()
     if response.status_code == 200:
