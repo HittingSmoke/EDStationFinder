@@ -20,3 +20,7 @@ I'm not going to hold anyone's hand with this. Download the script and install t
 ## Usage
 
 Modify the search criteria at the beginning of the file and just run it. It's all automated. It will download data from EDDB and EDSM to perform the searches. Any matches will be written to a file called results.txt in the run directory. The more broad your criteria, the longer it will take to run. It could take anywhere from an hour to a day depending on what you're searching for.
+
+----
+
+Licence: GPLv3. So if your self-esteem is low enough to actually resuse this code in your project, know your license restrictions.
