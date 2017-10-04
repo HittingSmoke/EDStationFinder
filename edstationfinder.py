@@ -213,14 +213,15 @@ def primeDatabase():
     - Create database file and connection then initialize schema.
     - Iterate over systems, then stations, writing to respective database tables.
     '''
-    systemsurl = 'https://eddb.io/archive/v5/systems_populated.jsonl'
-    stationsurl = 'https://eddb.io/archive/v5/stations.jsonl'
+    print('Priming database with system and station data from EDDB')
+    
+    if verbose:
+        print('Retreiving jsonl-formatted populated system and station data from EDDB')
+    systemsUrl = 'https://eddb.io/archive/v5/systems_populated.jsonl'
+    stationsUrl = 'https://eddb.io/archive/v5/stations.jsonl'
 
-    systemsjson = requests.get(systemsurl).text
-    stationsjson = requests.get(stationsurl).text
-
-    systems = systemsjson.splitlines()
-    stations = stationsjson.splitlines()
+    systemsResponse = requests.get(systemsUrl, stream=True).iter_lines(decode_unicode=True)
+    stationsResponse = requests.get(stationsUrl, stream=True).iter_lines(decode_unicode=True)
 
     db = sqlite3.connect('db.sqlite')
     c = db.cursor()
@@ -230,8 +231,7 @@ def primeDatabase():
     systemdatalist = []
     stationdatalist = []
 
-    print('Priming database with system and station data from EDDB')
-    for item in systems:
+    for item in systemsResponse:
         systemjson = json.loads(item)
         id = systemjson['id']
         edsmid = systemjson['edsm_id']
@@ -239,14 +239,18 @@ def primeDatabase():
         allegiance = systemjson['allegiance']
         population = systemjson['population']
         systemdata = [id, edsmid, name, allegiance, population]
+        if verbose:
+            print('Preparing to write %s to database' % (name))
         systemdatalist.append(systemdata)
 
-    print('Finished Systems')
     c.executemany('INSERT INTO system VALUES (?,?,?,?,?)', systemdatalist)
+    if verbose:
+        print('Writing populated systems to database')
     db.commit()
+    print('Finished Stations')
     systemdatalist = [] #Clear list. Probably not necessary but fuck it.
 
-    for item in stations:
+    for item in stationsResponse:
         stationjson = json.loads(item)
         id = stationjson['id']
         name = stationjson['name']
@@ -255,11 +259,13 @@ def primeDatabase():
         distance = stationjson['distance_to_star']
         allegiance = stationjson['allegiance']
         stationdata = [id, name, system, pad, distance, allegiance]
+        if verbose:
+            print('Preparing to write %s to database' % (name))
         stationdatalist.append(stationdata)
 
-    print('Finished Stations')
     c.executemany('INSERT INTO station VALUES (?,?,?,?,?,?)', stationdatalist)
     db.commit()
+    print('Finished Stations')
     db.close()
     stationdatalist = [] #Clear list. Probably not necessary but fuck it.
 
