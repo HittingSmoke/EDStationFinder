@@ -6,7 +6,7 @@ import sqlite3
 import json
 from timeit import default_timer as timer
 
-verbose = True #Verbose output for debugging.
+verbose = False #Verbose output for debugging.
 padSize = 'L' #Pad size for matches.
 lyRange = 14 #Maximum sitance between systems.
 minDistance = 30000 #Minimum station distance from star.
