@@ -32,7 +32,10 @@ def getSystemID(systemName): #Returns a system ID from a system name
     c.execute('''SELECT system.id 
                 FROM system
                 WHERE system.name=?''', [systemName] )
-    systemID = dict(c.fetchone()).get('id')
+    try:
+        systemID = dict(c.fetchone()).get('id')
+    except TypeError:
+        systemID = False
     if verbose:
         print('Returning %s ID: %d' % (systemName, systemID))
     return systemID
@@ -91,7 +94,8 @@ def findStations(minDistance, maxDistance, padSize): #Find an initial list of sy
                 WHERE station.distance > ? and station.distance < ? and station.pad=?''', criteria)
     stations = c.fetchall()
     for station in stations:
-        stationList.append(dict(station))
+        stationdict = dict(station)
+        stationList.append(stationdict)
     if verbose:
         print('Returning list of stations %d-%d from start with a %s landing pad:\n%s' % (minDistance, maxDistance, padSize, stationList))
     return stationList
@@ -144,6 +148,8 @@ def isSystemHit(systemID): #Determine if a system by ID matches search criteria.
             if verbose:
                 print('%s is within stationRange of %d-%d(%d) with a %s pad' % (stationName, minDistance, maxDistance, distance, padSize))
             return True
+    else:
+        return False
 
 def compareStations(): 
     '''
@@ -158,22 +164,22 @@ def compareStations():
         originSystemName = station.get('systemname')
         originStationDistance = station.get('distance')
         nearbySystems = findNearbyStations(originSystemName, lyRange)
-        for system in nearbySystems:
-            destSystemName = system.get('name')
-            destSystemDistance = system.get('distance')
-            try:
+        if getStationCount(originSystemID) == 1:
+            for system in nearbySystems:
+                destSystemName = system.get('name')
+                destSystemDistance = system.get('distance')
                 destSystemID = getSystemID(destSystemName)
-                if verbose:
-                    print('Comparing %s to %s' % (originSystemName, destSystemName))
-                if isSystemHit(destSystemID) and duplicate(originSystemName, destSystemName) == False:
-                    destStationDistance = listSystemStations(destSystemID)[0].get('distance')
-                    print('\n!HIT: %s(%sls) to %s(%sls) - (%dly)\n' % (originSystemName, format(originStationDistance, ',d'), destSystemName, format(destStationDistance, ',d'), destSystemDistance))
-                    with open('results.txt', 'a') as results:
-                        results.write('%s(%sls) to %s(%sls) - (%dly)\r\n' % (originSystemName, format(originStationDistance, ',d'), destSystemName, format(destStationDistance, ',d'), destSystemDistance))
-                    results.close()
-            except TypeError:
-                pass
-
+                if destSystemID != False:
+                    if verbose:
+                        print('Comparing %s to %s' % (originSystemName, destSystemName))
+                    if isSystemHit(destSystemID) and duplicate(originSystemName, destSystemName) == False:
+                        destStationDistance = listSystemStations(destSystemID)[0].get('distance')
+                        print('\n!HIT: %s(%sls) to %s(%sls) - (%dly)\n' % (originSystemName, format(originStationDistance, ',d'), destSystemName, format(destStationDistance, ',d'), destSystemDistance))
+                        with open('results.txt', 'a') as results:
+                            results.write('%s(%sls) to %s(%sls) - (%dly)\r\n' % (originSystemName, format(originStationDistance, ',d'), destSystemName, format(destStationDistance, ',d'), destSystemDistance))
+                        results.close()
+    raise SystemExit('Done')
+    
 def duplicate(originSystemName, destSystemName): #Check if origin and destination are same or exist in results.txt already in reverse order.
     if originSystemName == destSystemName:
         if verbose:
